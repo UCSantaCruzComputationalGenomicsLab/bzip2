@@ -26,6 +26,14 @@ CC=gcc
 BIGFILES=-D_FILE_OFFSET_BITS=64
 CFLAGS=-fpic -fPIC -Wall -Winline -O2 -g $(BIGFILES)
 
+#hack to compile on osx
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+SO_OPT_FLAG = -install_name
+else
+SO_OPT_FLAG = -soname
+endif
+
 OBJS= blocksort.o  \
       huffman.o    \
       crctable.o   \
@@ -35,7 +43,7 @@ OBJS= blocksort.o  \
       bzlib.o
 
 all: $(OBJS)
-	$(CC) -shared -Wl,-soname -Wl,libbz2.so.1.0 -o libbz2.so.1.0.6 $(OBJS)
+	$(CC) -shared -Wl,$(SO_OPT_FLAG) -Wl,libbz2.so.1.0 -o libbz2.so.1.0.6 $(OBJS)
 	$(CC) $(CFLAGS) -o bzip2-shared bzip2.c libbz2.so.1.0.6
 	rm -f libbz2.so.1.0
 	ln -s libbz2.so.1.0.6 libbz2.so.1.0
